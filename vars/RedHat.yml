@@ -1,0 +1,3 @@
+---
+default_file: "/etc/sysconfig/kibana"
+kibana_home: "/usr/share/kibana"

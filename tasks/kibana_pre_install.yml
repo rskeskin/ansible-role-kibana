@@ -1,0 +1,63 @@
+---
+# Copyright 2018, Yildiz Technical University Computer Engineering Department
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: os-specific vars
+  include_vars: "{{ansible_os_family}}.yml"
+
+- name: Create kibana group
+  group:
+    name: "{{ kibana_group }}"
+    state: present
+    system: yes
+
+- name: Create kibana user
+  user:
+    name: "{{ kibana_user }}"
+    state: present
+    system: yes
+    createhome: no
+    group: "{{ kibana_group }}"
+
+- name: Create Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+  with_items:
+   - "{{ kibana_conf_dir }}"
+   - "{{ kibana_data_dirs }}"
+
+- name: Refresh repo
+  apt:
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure apt-transport-https installed
+  apt:
+    name: apt-transport-https
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Add elastic apt-key
+  apt_key:
+    url: "{{ kibana_apt_key }}"
+    state: present 
+
+- name: Add elastic deb repo
+  apt_repository:
+    repo: "{{ kibana_apt_url }}"
+    state: present
+    filename: "elastic-{{kibana_major_version}}"

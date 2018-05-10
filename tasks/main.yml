@@ -1,0 +1,7 @@
+---
+# tasks file for logstash
+
+- include: kibana_pre_install.yml
+- include: kibana_install.yml
+- include: kibana_post_install.yml
+
